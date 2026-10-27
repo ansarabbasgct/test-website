@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --primary:#10B981;
+  --primary-dark:#0F5132;
+  --correct:#10B981;
+  --wrong:#EF4444;
+  --bg:#F0FDF4;
+  --card:#FFFFFF;
+  --text:#111827;
+  --muted:#6B7280;
+  --border:#E5E7EB;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#F0FDF4,#ECFDF5);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;color:var(--text);
+}
+.quiz-container{
+  background:var(--card);border-radius:20px;padding:28px 24px;
+  max-width:640px;width:100%;
+  box-shadow:0 20px 60px rgba(15,81,50,0.1),0 4px 14px rgba(15,81,50,0.06);
+}
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:20px;flex-wrap:wrap;gap:10px;
+}
+.header h1{font-size:1.3rem;font-weight:800;color:var(--primary-dark);}
+.score-badge{
+  background:linear-gradient(135deg,#10B981,#0F5132);color:#fff;
+  padding:8px 16px;border-radius:50px;font-weight:700;font-size:0.85rem;
+  box-shadow:0 4px 12px rgba(16,185,129,0.3);
+}
+.progress-track{
+  height:8px;background:#E5E7EB;border-radius:10px;overflow:hidden;margin-bottom:20px;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,#34D399,#10B981);
+  width:0%;transition:width 0.4s ease;border-radius:10px;
+}
+.q-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:14px;font-size:0.8rem;color:var(--muted);font-weight:600;
+}
+.q-number{
+  background:rgba(16,185,129,0.1);color:var(--primary-dark);
+  padding:4px 12px;border-radius:50px;font-weight:700;
+}
+.q-text{
+  font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:20px;
+  line-height:1.5;padding:16px;background:rgba(16,185,129,0.04);
+  border-left:4px solid var(--primary);border-radius:8px;
+}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.option{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  background:#F9FAFB;border:2px solid var(--border);border-radius:12px;
+  cursor:pointer;font-family:inherit;font-size:0.95rem;font-weight:600;
+  color:var(--text);text-align:left;transition:all 0.2s ease;width:100%;
+}
+.option:hover:not(.disabled){border-color:var(--primary);background:#fff;transform:translateX(4px);}
+.option .letter{
+  width:30px;height:30px;border-radius:50%;background:#E5E7EB;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.8rem;flex-shrink:0;transition:all 0.2s;
+}
+.option.correct{border-color:var(--correct);background:rgba(16,185,129,0.1);animation:correctPop 0.4s ease;}
+.option.correct .letter{background:var(--correct);color:#fff;}
+.option.wrong{border-color:var(--wrong);background:rgba(239,68,68,0.1);animation:wrongShake 0.4s ease;}
+.option.wrong .letter{background:var(--wrong);color:#fff;}
+.option.disabled{cursor:not-allowed;}
+@keyframes correctPop{0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.feedback{
+  text-align:center;padding:12px;border-radius:10px;font-weight:700;
+  font-size:0.9rem;margin-bottom:16px;display:none;
+}
+.feedback.show{display:block;animation:fadeUp 0.3s ease;}
+.feedback.correct{background:rgba(16,185,129,0.1);color:var(--primary-dark);border:1px solid rgba(16,185,129,0.3);}
+.feedback.wrong{background:rgba(239,68,68,0.1);color:#991B1B;border:1px solid rgba(239,68,68,0.3);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.next-btn{
+  width:100%;padding:14px;background:linear-gradient(135deg,#10B981,#0F5132);
+  color:#fff;border:none;border-radius:12px;font-family:inherit;
+  font-weight:700;font-size:0.95rem;cursor:pointer;
+  display:none;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 6px 20px rgba(16,185,129,0.3);transition:all 0.2s;
+}
+.next-btn.show{display:flex;animation:fadeUp 0.4s ease;}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,0.4);}
+.next-btn:active{transform:translateY(0);}
+
+.result-screen{display:none;text-align:center;padding:20px 0;}
+.result-screen.show{display:block;animation:fadeUp 0.5s ease;}
+.result-emoji{font-size:4rem;margin-bottom:10px;}
+.result-score{font-size:3rem;font-weight:800;color:var(--primary-dark);margin-bottom:6px;}
+.result-score span{font-size:1.2rem;color:var(--muted);}
+.result-message{font-size:1rem;font-weight:600;color:var(--muted);margin-bottom:24px;}
+.restart-btn{
+  padding:14px 32px;background:linear-gradient(135deg,#10B981,#0F5132);
+  color:#fff;border:none;border-radius:12px;font-family:inherit;
+  font-weight:700;font-size:0.95rem;cursor:pointer;
+  box-shadow:0 6px 20px rgba(16,185,129,0.3);transition:all 0.2s;
+}
+.restart-btn:hover{transform:translateY(-2px);}
+
+@media(max-width:480px){
+  .quiz-container{padding:20px 16px;}
+  .header h1{font-size:1.1rem;}
+  .q-text{font-size:1rem;padding:14px;}
+  .option{padding:12px 14px;font-size:0.88rem;}
+  .result-score{font-size:2.4rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <!-- Quiz screen -->
+  <div id="quizScreen">
+    <div class="header">
+      <h1><i class="fa-solid fa-graduation-cap" style="color:var(--primary);"></i> Quiz Test</h1>
+      <div class="score-badge"><i class="fa-solid fa-star"></i> <span id="scoreDisplay">0</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="q-meta">
+      <span class="q-number" id="qNumber">Question 1 / 50</span>
+      <span><i class="fa-solid fa-check-circle" style="color:var(--primary);"></i> <span id="correctCount">0</span> correct</span>
+    </div>
+    <div class="q-text" id="qText">Loading...</div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">
+      Next Question <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- Result screen -->
+  <div class="result-screen" id="resultScreen">
+    <div class="result-emoji" id="resultEmoji">🎉</div>
+    <div class="result-score"><span id="finalScore">0</span><span> / <span id="totalQuestions">50</span></span></div>
+    <div class="result-message" id="resultMessage">Great job!</div>
+    <button class="restart-btn" onclick="restartQuiz()">
+      <i class="fa-solid fa-rotate-right"></i> Try Again
+    </button>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script>
+let currentIndex = 0;
+let score = 0;
+let correctCount = 0;
+let answered = false;
+let shuffledQuestions = [];
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  shuffledQuestions = shuffle(QUIZ_QUESTIONS);
+  currentIndex = 0;
+  score = 0;
+  correctCount = 0;
+  document.getElementById('quizScreen').style.display = 'block';
+  document.getElementById('resultScreen').classList.remove('show');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  const q = shuffledQuestions[currentIndex];
+  const total = shuffledQuestions.length;
+
+  document.getElementById('qNumber').textContent = `Question ${currentIndex + 1} / ${total}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressFill').style.width = `${((currentIndex) / total) * 100}%`;
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('correctCount').textContent = correctCount;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = q.options.map((opt, i) => `
+    <button class="option" onclick="selectAnswer(${i})" data-index="${i}">
+      <span class="letter">${letters[i]}</span>
+      <span>${escapeHtml(opt)}</span>
+    </button>
+  `).join('');
+
+  const feedback = document.getElementById('feedback');
+  feedback.className = 'feedback';
+  feedback.textContent = '';
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.remove('show');
+  if(currentIndex === total - 1){
+    nextBtn.innerHTML = 'See Result <i class="fa-solid fa-flag-checkered"></i>';
+  } else {
+    nextBtn.innerHTML = 'Next Question <i class="fa-solid fa-arrow-right"></i>';
+  }
+}
+
+function selectAnswer(idx){
+  if(answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentIndex];
+  const options = document.querySelectorAll('.option');
+  const feedback = document.getElementById('feedback');
+
+  options.forEach(o => o.classList.add('disabled'));
+
+  if(idx === q.answer){
+    options[idx].classList.add('correct');
+    score++;
+    correctCount++;
+    feedback.textContent = '✅ Correct!';
+    feedback.className = 'feedback show correct';
+    document.getElementById('scoreDisplay').textContent = score;
+    document.getElementById('correctCount').textContent = correctCount;
+  } else {
+    options[idx].classList.add('wrong');
+    options[q.answer].classList.add('correct');
+    feedback.textContent = `❌ Wrong! Sahi jawab: ${q.options[q.answer]}`;
+    feedback.className = 'feedback show wrong';
+  }
+
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function nextQuestion(){
+  const total = shuffledQuestions.length;
+  if(currentIndex === total - 1){
+    showResult();
+  } else {
+    currentIndex++;
+    renderQuestion();
+  }
+}
+
+function showResult(){
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('quizScreen').style.display = 'none';
+  const resultScreen = document.getElementById('resultScreen');
+  resultScreen.classList.add('show');
+  document.getElementById('finalScore').textContent = correctCount;
+  document.getElementById('totalQuestions').textContent = shuffledQuestions.length;
+
+  const percent = Math.round((correctCount / shuffledQuestions.length) * 100);
+  let emoji, msg;
+  if(percent >= 90){ emoji = '🏆'; msg = 'Outstanding! You are a genius!'; }
+  else if(percent >= 75){ emoji = '⭐'; msg = 'Excellent! Great job!'; }
+  else if(percent >= 60){ emoji = '🔥'; msg = 'Good work! Keep it up!'; }
+  else if(percent >= 40){ emoji = '👍'; msg = 'Not bad! Practice more.'; }
+  else { emoji = '💪'; msg = 'Keep trying! You will improve.'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultMessage').textContent = `${percent}% — ${msg}`;
+}
+
+function restartQuiz(){
+  startQuiz();
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+startQuiz();
+</script>
+</body>
+</html>
